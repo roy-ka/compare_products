@@ -7,16 +7,24 @@ module ProductCompare
 
     def get_data_from_link (link)
       data = ProductData.new(link)
+      begin
       @noko = get_html(link)
+      rescue OpenURI::HTTPError => ex
+        raise ex
+      end
+      return unless @noko
       data.title = get_title
       data.price = get_price
       data.images = get_images
-
+      data.att = get_attributes
       data
     end
 
     def get_html (link)
-      uri = URI.encode(link)
+
+      #uri = URI.encode(link)
+      return unless link =~ URI::ABS_URI
+      uri = URI(link)
       html = open(uri).read
       @noko = Nokogiri::HTML(html) do |config|
         config.strict.noblanks
@@ -43,6 +51,28 @@ module ProductCompare
       images
     end
 
+    def get_attributes
+      atts ={}
+      warping_div = @noko.css("div[@class='itemAttr']")
+      warping_div.css("table").css("tr").each do |tr|
+        name = []
+        value = []
+        tr.css("td").each do |td|
+          if td.attribute("class")
+               name.push td.text.gsub!(/[^0-9A-Za-z]/, '')
+          else
+             value.push td.text.gsub!(/[^0-9A-Za-z]/, '')
+          end
+        end
+        next unless name.size == value.size
+        name.each_index do |i|
+          atts[name[i]] = value[i]
+        end
+      end
+      atts.delete("Condition") if atts.has_key?("Condition")
+      atts
+    end
 
   end
+
 end
