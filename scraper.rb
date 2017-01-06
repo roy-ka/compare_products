@@ -5,7 +5,8 @@ require 'nokogiri'
 module ProductCompare
   class Scraper
 
-    def get_data_from_link (link)
+    def get_data_from_link(link)
+      p link
       data = ProductData.new(link)
       begin
       @noko = get_html(link)
@@ -17,13 +18,15 @@ module ProductCompare
       data.price = get_price
       data.images = get_images
       data.att = get_attributes
+      data.category = get_category
       data
     end
 
-    def get_html (link)
+    def get_html(link)
 
-      #uri = URI.encode(link)
-      return unless link =~ URI::ABS_URI
+      unless link =~ URI::ABS_URI
+        raise 'this is not a valid link'
+      end
       uri = URI(link)
       html = open(uri).read
       @noko = Nokogiri::HTML(html) do |config|
@@ -71,6 +74,17 @@ module ProductCompare
       end
       atts.delete("Condition") if atts.has_key?("Condition")
       atts
+    end
+
+    def get_category
+      categories = []
+      noko_categories = @noko.css("td[@id='vi-VR-brumb-lnkLst']").css("h2")
+      return unless noko_categories
+      noko_categories.css("span[@itemprop='name']").each do |cat|
+        next unless cat.css("a").empty?
+        categories.push cat.text
+      end
+      categories
     end
 
   end
