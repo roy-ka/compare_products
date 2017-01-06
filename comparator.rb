@@ -2,16 +2,19 @@
 module Comparator
   class  << self
 
-    def compare_products products #array of products
+    def compare_products(products) #receive hash of products, return hash containing all the matching data. key: [link1,link2], value: ProductMatch obj.
       @compare_products = {}
       @products = products
-      @products.each_with_index do |prod1,ind|
-        next unless prod1.kind_of? ProductCompare::ProductData #validate we extracted the data from the link
-        ((ind + 1)...@products.size).each do |j|
-          next unless @products[j].kind_of? ProductCompare::ProductData #validate we extracted the data from the link
-          prods = [prod1,@products[j]]
-          @compare_products[prods] = ProductsMatch.new(prods)
-          compare_two_products @compare_products[prods]
+      keys =@products.keys
+      keys.each_with_index do |link1,ind|
+        next unless @products[link1].kind_of? ProductCompare::ProductData #validate we extracted the data from the link
+        ((ind + 1)...keys.size).each do |j|
+          link2 = keys[j]
+          next unless @products[link2].kind_of? ProductCompare::ProductData #validate we extracted the data from the link
+          id = [link1,link2]
+          prods = [@products[link1],@products[link2]]
+          @compare_products[id] = ProductsMatch.new(id,prods)
+          compare_two_products @compare_products[id]
         end
       end
       @compare_products
@@ -25,7 +28,7 @@ module Comparator
     end
 
     def compare_atts(matcher)
-      prod1,prod2 = matcher.id
+      prod1,prod2 = matcher.products
       atts = prod1.att.keys & prod2.att.keys #the common atts between the products
       check = 0
       atts.each { |key|
@@ -34,8 +37,8 @@ module Comparator
       matcher.attributes = 100*check/atts.size
     end
 
-    def compare_titles(matcher)
-      prods = matcher.id
+    def compare_titles(matcher) #compare titles composed on several tests: matching words, sequences of words and units
+      prods = matcher.products
       titles = []
       prods.each do |prod|
         (titles).push prod.title.downcase.gsub(/[^0-9A-Za-z.]/,' ').split
@@ -53,7 +56,7 @@ module Comparator
       t1,t2 = titles
       matches = t1 & t2
       match_arr = {}
-      indices = Array.new(2) { Array.new() }
+      indices = Array.new(2) { Array.new }
       matches.each do |word|
         match_word = MatchWord.new(word)
         ind1 = t1.find_index(word)
@@ -76,6 +79,14 @@ module Comparator
         seq.push find_sequence index
       end
       matcher.seq = seq
+      seq_score = 0
+      seq.each do |seq_prod|
+        seq_prod.each do |seq_length|
+          seq_score += seq_length*seq_length
+        end
+      end
+      matcher.seq_score = seq_score/10
+
     end
 
     def find_sequence(indexes) #calculate n-grams of words
@@ -86,8 +97,6 @@ module Comparator
         previous_id = indexes[ind-1]
         if id == previous_id + 1
           counter += 1
-          # seq.add(previous_id)
-          # seq.add(id)
         else
           seq.push counter unless counter == 1
           counter = 1
@@ -97,20 +106,19 @@ module Comparator
     end
 
     def compare_categories(matcher)
-      prod1,prod2 = matcher.id
+      prod1,prod2 = matcher.products
       matcher.categories = prod1.category == prod2.category
     end
 
     def compare_units(titles,matcher) #compare between units in the title for words that not matching
-      matcher.units_score = true
+      matcher.units_score = false
       units_arr = []
       titles.each do |title| #Array, each object in the Array is a hash, as describes at get_units
         units_arr.push get_units(title)
       end
-      arr_size =units_arr.size
       units_arr[0].each do |unit,value| #wach unit in prod 1
         next unless units_arr[1].has_key? unit
-        matcher.units_score = false unless value == units_arr[1][unit]
+        matcher.units_score = true if value == units_arr[1][unit]
       end
 
    end
@@ -128,16 +136,8 @@ module Comparator
       units
     end
 
-    def calculate_score matcher
-      p "---------------------------------------------------------"
-      p "atts",matcher.attributes
-      p "cat", matcher.categories
-      p "title", matcher.title
-      p "units", matcher.units_score
-      p "matching_words", matcher.matching_words_score
-      p "seq", matcher.seq
-      p "---------------------------------------------------------"
-
+    def calculate_score(matcher)
+      matcher.calculate_score
     end
 
   end
