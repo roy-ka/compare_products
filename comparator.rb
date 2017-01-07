@@ -111,14 +111,23 @@ module Comparator
     end
 
     def compare_units(titles,matcher) #compare between units in the title for words that not matching
-      matcher.units_score = false
+                                      #if we couldn't find units to compare than set value of 0
+                                      #if there is a mismatch between one of the units set -1
+                                      #if there are only matches set 1.
+                                      #in case of both match and mismatch- set -1
+      matcher.units_score = 0
       units_arr = []
       titles.each do |title| #Array, each object in the Array is a hash, as describes at get_units
         units_arr.push get_units(title)
       end
       units_arr[0].each do |unit,value| #wach unit in prod 1
         next unless units_arr[1].has_key? unit
-        matcher.units_score = true if value == units_arr[1][unit]
+        if (value == units_arr[1][unit]) && (matcher.units_score != -1)
+          matcher.units_score = 1
+        elsif value !=units_arr[1][unit]
+          matcher.units_score = -1
+        end
+
       end
 
    end

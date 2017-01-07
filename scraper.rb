@@ -15,10 +15,12 @@ module ProductCompare
       end
       return unless @noko
       data.title = get_title
+      #raise "Could not locate title, make sure the link is a product!" if data.title = ""
       data.price = get_price
       data.images = get_images
       data.att = get_attributes
       data.category = get_category
+      p data
       data
     end
 
