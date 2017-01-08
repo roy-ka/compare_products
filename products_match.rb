@@ -20,7 +20,7 @@ module Comparator
       score = matching_words_score + seq_score + 0.5*attributes #matchin_words : max 100, seq_score no_max(~ 10 max), attributes: max 100(*0.5)
       score += 50*units_score
       score += 100 if categories
-      @total_score = score/3.6 #normalization factor
+      @total_score = score/2.34 #normalization factor
     end
 
     def is_match?

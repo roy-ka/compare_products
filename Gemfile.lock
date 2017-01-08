@@ -1,1 +1,19 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    fxruby (1.6.34-x64-mingw32)
+      mini_portile (~> 0.6)
+    mini_portile (0.6.2)
+    mini_portile2 (2.1.0)
+    nokogiri (1.7.0-x64-mingw32)
+      mini_portile2 (~> 2.1.0)
 
+PLATFORMS
+  x64-mingw32
+
+DEPENDENCIES
+  fxruby
+  nokogiri
+
+BUNDLED WITH
+   1.13.7

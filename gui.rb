@@ -1,10 +1,6 @@
 class GUI
 
   def initialize
-    link0 ="http://www.ebay.com/itm/NEW-AG1-AG13-1-5V-Alkaline-Button-Coin-Cells-Watch-Battery-Batteries-Seraphic-/201756212511"
-    link1 ="http://www.ebay.com/itm/Decent-10Pcs-AG13-LR44-1-5V-Alkaline-Button-Coin-Cells-Watch-Battery-Batteries-/221961854557"
-    @link1 = FXDataTarget.new(link0)
-    @link2 = FXDataTarget.new(link1)
     @link1 = FXDataTarget.new("insert first link")
     @link2 = FXDataTarget.new("insert second link")
     @temp = FXDataTarget.new(" ")
@@ -23,7 +19,7 @@ class GUI
     FXLabel.new(matrix, "&result:", nil, LAYOUT_CENTER_Y|LAYOUT_CENTER_X|JUSTIFY_RIGHT|LAYOUT_FILL_ROW)
     @score= FXTextField.new(matrix,100,@temp, TEXT_READONLY|LAYOUT_CENTER_Y|LAYOUT_CENTER_X|JUSTIFY_RIGHT|LAYOUT_FILL_ROW, :width =>50 )
     FXLabel.new(matrix, "&", nil, LAYOUT_CENTER_Y|LAYOUT_CENTER_X|JUSTIFY_RIGHT|LAYOUT_FILL_ROW)
-    FXLabel.new(matrix, "&A score above 60 means it's the same product", nil, LAYOUT_CENTER_Y|LAYOUT_CENTER_X|JUSTIFY_RIGHT|LAYOUT_FILL_ROW)
+    FXLabel.new(matrix, "&A score above 100 means it's the same product", nil, LAYOUT_CENTER_Y|LAYOUT_CENTER_X|JUSTIFY_RIGHT|LAYOUT_FILL_ROW)
     compare_button = FXButton.new(matrix, "compare" )
     compare_button.connect(SEL_COMMAND) {
       links = [@link1.to_s, @link2.to_s]
